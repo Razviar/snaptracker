@@ -85,5 +85,8 @@ export function settingsChecker(event: Event): void {
     case 'o-interactive':
       sendMessageToIpcMain('set-setting-o-interactive', cl.checked);
       break;
+    case 'o-hidesessionstats':
+      sendMessageToIpcMain('set-setting-o-hidesessionstats', cl.checked);
+      break;
   }
 }

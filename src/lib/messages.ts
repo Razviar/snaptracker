@@ -124,6 +124,7 @@ export interface Messages {
   'set-setting-o-detach': boolean;
   'set-setting-o-hidemain': boolean;
   'set-setting-o-interactive': boolean;
+  'set-setting-o-hidesessionstats': boolean;
   'hk-my-deck': string;
   'hk-opp-deck': string;
   'hk-overlay': string;

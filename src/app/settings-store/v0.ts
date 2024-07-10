@@ -32,4 +32,5 @@ export interface OverlaySettingsV0 {
   mydecks: boolean;
   cardhover: boolean;
   timers: boolean;
+  hidesessionstats: boolean;
 }

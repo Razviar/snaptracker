@@ -18,6 +18,7 @@ import {AccountV8, SettingsV9} from 'root/app/settings-store/v9';
 import {error} from 'root/lib/logger';
 import {AnyMap, asBoolean, asMap, asNumber, asNumberString, asString} from 'root/lib/type_utils';
 import {isMac} from 'root/lib/utils';
+import {AccountV13, OverlaySettingsV10, SettingsV16} from './v16';
 
 type StorePath = string & {_: 'StorePath'};
 
@@ -48,6 +49,7 @@ class SettingsStore {
   }
 
   public set(newSettings: LatestSettings): void {
+    console.info('updating settings', newSettings);
     this.data = newSettings;
     this.save();
   }
@@ -82,9 +84,9 @@ class SettingsStore {
   }
 }
 
-export type LatestSettings = SettingsV15;
-export type OverlaySettings = OverlaySettingsV9;
-export type Account = AccountV12;
+export type LatestSettings = SettingsV16;
+export type OverlaySettings = OverlaySettingsV10;
+export type Account = AccountV13;
 type AllSettings =
   | SettingsV0
   | SettingsV1
@@ -99,7 +101,8 @@ type AllSettings =
   | SettingsV10
   | SettingsV11
   | SettingsV12
-  | SettingsV15;
+  | SettingsV15
+  | SettingsV16;
 
 export enum Version {
   v0,
@@ -116,6 +119,7 @@ export enum Version {
   v11,
   v12,
   v15,
+  v16,
 }
 
 export interface SettingsBase {
@@ -149,6 +153,7 @@ function asOverlaySettings(anyMap: AnyMap | undefined): OverlaySettingsV0 | unde
   const neverhide = asBoolean(anyMap['neverhide']);
   const mydecks = asBoolean(anyMap['mydecks']);
   const cardhover = asBoolean(anyMap['cardhover']);
+  const hidesessionstats = asBoolean(anyMap['hidesessionstats']);
 
   if (
     leftdigit === undefined ||
@@ -161,7 +166,8 @@ function asOverlaySettings(anyMap: AnyMap | undefined): OverlaySettingsV0 | unde
     neverhide === undefined ||
     cardhover === undefined ||
     mydecks === undefined ||
-    hidezero === undefined
+    hidezero === undefined ||
+    hidesessionstats === undefined
   ) {
     return undefined;
   }
@@ -178,6 +184,7 @@ function asOverlaySettings(anyMap: AnyMap | undefined): OverlaySettingsV0 | unde
     neverhide,
     mydecks,
     cardhover,
+    hidesessionstats,
   };
 }
 
@@ -543,6 +550,68 @@ function asOverlaySettingsV9(ovlSettings: OverlaySettingsV8 | undefined): Overla
   };
 }
 
+function asOverlaySettingsV10(ovlSettings: OverlaySettingsV9 | undefined): OverlaySettingsV10 | undefined {
+  if (!ovlSettings) {
+    return undefined;
+  }
+
+  const leftdigit = ovlSettings.leftdigit;
+  const rightdigit = ovlSettings.rightdigit;
+  const bottomdigit = ovlSettings.bottomdigit;
+  const rightdraftdigit = ovlSettings.rightdraftdigit;
+  const leftdraftdigit = ovlSettings.leftdigit;
+  const hidemy = ovlSettings.hidemy;
+  const hideopp = ovlSettings.hideopp;
+  const hidezero = ovlSettings.hidezero;
+  const showcardicon = ovlSettings.showcardicon;
+  const cardsinarow = ovlSettings.cardsinarow;
+  const timers = ovlSettings.timers;
+  const neverhide = ovlSettings.neverhide;
+  const mydecks = ovlSettings.mydecks;
+  const cardhover = ovlSettings.cardhover;
+  const savepositiontop = ovlSettings.savepositiontop;
+  const savepositionleft = ovlSettings.savepositionleft;
+  const savepositiontopopp = ovlSettings.savepositiontopopp;
+  const savepositionleftopp = ovlSettings.savepositionleftopp;
+  const savescale = ovlSettings.savescale;
+  const opacity = ovlSettings.opacity;
+  const fontcolor = ovlSettings.fontcolor;
+  const detach = ovlSettings.detach;
+  const hidemain = ovlSettings.hidemain;
+  const interactive = ovlSettings.interactive;
+  const hidesuggestions = ovlSettings.hidesuggestions;
+  const hidesessionstats = false;
+
+  return {
+    leftdigit,
+    rightdigit,
+    bottomdigit,
+    rightdraftdigit,
+    leftdraftdigit,
+    hidemy,
+    hideopp,
+    hidezero,
+    showcardicon,
+    timers,
+    neverhide,
+    mydecks,
+    cardhover,
+    savepositiontop,
+    savepositionleft,
+    savepositiontopopp,
+    savepositionleftopp,
+    savescale,
+    opacity,
+    cardsinarow,
+    fontcolor,
+    detach,
+    hidemain,
+    interactive,
+    hidesuggestions,
+    hidesessionstats,
+  };
+}
+
 function asPlayer(anyMap: AnyMap | undefined): Player | undefined {
   if (!anyMap) {
     return undefined;
@@ -780,6 +849,24 @@ function asAccountsV12(accountsV11: AccountV11[]): AccountV12[] {
   return res;
 }
 
+function asAccountsV13(accountsV12: AccountV12[]): AccountV13[] {
+  const res: AccountV13[] = [];
+
+  accountsV12.forEach((acc) => {
+    res.push({
+      uid: acc.uid,
+      token: acc.token,
+      nick: acc.nick,
+      overlay: acc.overlay,
+      player: acc.player,
+      overlaySettings: asOverlaySettingsV10(acc.overlaySettings),
+      hotkeysSettings: acc.hotkeysSettings,
+      game: 'mtga',
+    });
+  });
+  return res;
+}
+
 function migrateV0toV1(v0: SettingsV0): SettingsV1 {
   return {
     version: Version.v1,
@@ -1002,6 +1089,24 @@ function migrateV12toV15(v12: SettingsV12): SettingsV15 {
   };
 }
 
+function migrateV15toV16(v15: SettingsV15): SettingsV16 {
+  return {
+    version: Version.v16,
+    accounts: asAccountsV13(v15.accounts),
+    userToken: undefined,
+    icon: v15.icon,
+    autorun: v15.autorun,
+    minimized: v15.minimized,
+    overlay: v15.overlay,
+    manualUpdate: v15.manualUpdate,
+    awaiting: v15.awaiting,
+    logPath: v15.logPath,
+    mtgaPath: v15.mtgaPath,
+    nohotkeys: v15.nohotkeys,
+    uploads: v15.uploads,
+  };
+}
+
 function parseSettings(settings: AllSettings): LatestSettings {
   // Recursively parse settings and migrate them to arrive at latest version
   switch (settings.version) {
@@ -1031,6 +1136,8 @@ function parseSettings(settings: AllSettings): LatestSettings {
       return parseSettings(migrateV11toV12(settings));
     case Version.v12:
       return parseSettings(migrateV12toV15(settings));
+    case Version.v15:
+      return parseSettings(migrateV15toV16(settings));
     default:
       return settings;
   }

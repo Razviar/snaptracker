@@ -115,10 +115,13 @@ export function drawSession(
       </div>
     </div>`;
 
+  const {hidesessionstats = false} = overlayConfig.ovlSettings ?? {};
   overlayElements.DeckName.innerHTML = 'Current Session Stats';
   overlayElements.MainOut.innerHTML = output;
 
-  overlayElements.MainDeckFrame.classList.remove('hidden');
+  if (hidesessionstats && !overlayElements.MainDeckFrame.classList.contains('hidden'))
+    overlayElements.MainDeckFrame.classList.add('hidden');
+  else overlayElements.MainDeckFrame.classList.remove('hidden');
   //toggleButtonClass(overlayElements.ToggleMe, overlayElements.MainDeckFrame.classList.contains('hidden'));
 
   /*const AllCards = document.getElementsByClassName('DcDrow');

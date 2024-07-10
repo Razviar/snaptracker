@@ -199,4 +199,5 @@ export const DefaultOvlSettings: OverlaySettings = {
   interactive: true,
   cardsinarow: 6,
   hidesuggestions: false,
+  hidesessionstats: false,
 };

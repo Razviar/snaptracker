@@ -318,6 +318,7 @@ export function setupIpcMain(app: App): void {
     'set-setting-o-hidemy',
     'set-setting-o-hideopp',
     'set-setting-o-hidesuggestions',
+    'set-setting-o-hidesessionstats',
     'set-setting-o-neverhide',
     'set-setting-o-cardhover',
     'set-setting-o-savepositiontop',
@@ -344,7 +345,7 @@ export function setupIpcMain(app: App): void {
         session.overlaySettings[settingType] = newOverlaySetting;
       }
       settingsStore.save();
-      if (i <= 5) {
+      if (i <= 6) {
         sendMessageToOverlayWindow('set-ovlsettings', session.overlaySettings);
       }
     });
